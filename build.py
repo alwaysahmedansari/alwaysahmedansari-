@@ -5,7 +5,8 @@ from string import Template
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.environ.get("OUT", HERE)
-A = OUT + "/assets"
+PFX = "" if os.environ.get("FLAT") else "assets/"
+A = OUT + "/" + PFX.rstrip("/")
 os.makedirs(A, exist_ok=True)
 
 IG = "https://instagram.com/alwaysahmedansari"
@@ -146,14 +147,14 @@ for th, t in TH.items():
         w(f"svc{i}", service(*s, t))
     w("ig", social("ig", t))
     w("th", social("th", t))
-for f in os.listdir(A):
+for f in [x for x in os.listdir(A) if x.endswith(".svg")]:
     ET.parse(f"{A}/{f}")  # fails loudly if any SVG is not well-formed XML
 
 
 def pic(n, alt, wd="", m="file"):
     def s(th):
         if m == "file":
-            return f"assets/{n}-{th}.svg"
+            return f"{PFX}{n}-{th}.svg"
         return "data:image/svg+xml;base64," + base64.b64encode(open(f"{A}/{n}-{th}.svg", "rb").read()).decode()
     wa = f' width="{wd}"' if wd else ""
     return f'<picture><source media="(prefers-color-scheme: dark)" srcset="{s("dark")}"><img src="{s("light")}" alt="{alt}"{wa}></picture>'
